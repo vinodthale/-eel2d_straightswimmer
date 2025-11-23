@@ -1,0 +1,124 @@
+name: MATLAB Build and Test
+
+on:
+  push:
+    branches: [ main, master, 'claude/**' ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build and Test with MATLAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: R2023b
+          cache: true
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libx11-6 \
+            libxext6 \
+            libxrender1 \
+            libxtst6 \
+            libxi6 \
+            libgtk-3-0
+
+      - name: Display MATLAB version and info
+        uses: matlab-actions/run-command@v2
+        with:
+          command: "ver"
+
+      - name: Run MATLAB script and generate geometry
+        uses: matlab-actions/run-command@v2
+        with:
+          command: |
+            fprintf('Running eel2d_straightswimmer...\n');
+            eel2d_straightswimmer;
+            fprintf('Script completed successfully.\n');
+            if exist('eel2d.vertex', 'file')
+              fprintf('Output file eel2d.vertex generated successfully.\n');
+              fileInfo = dir('eel2d.vertex');
+              fprintf('File size: %d bytes\n', fileInfo.bytes);
+            else
+              error('Output file eel2d.vertex was not generated!');
+            end
+
+      - name: Save generated plot
+        uses: matlab-actions/run-command@v2
+        with:
+          command: |
+            fprintf('Saving eel geometry plot...\n');
+            eel2d_straightswimmer;
+            title('2D Eel Straight Swimmer Geometry');
+            xlabel('X coordinate');
+            ylabel('Y coordinate');
+            axis equal;
+            grid on;
+            saveas(gcf, 'eel2d_geometry.png');
+            saveas(gcf, 'eel2d_geometry.fig');
+            fprintf('Plot saved successfully.\n');
+
+      - name: Verify generated files
+        run: |
+          echo "Checking generated files..."
+          if [ -f "eel2d.vertex" ]; then
+            echo "✓ eel2d.vertex exists"
+            echo "File size: $(wc -c < eel2d.vertex) bytes"
+            echo "Number of lines: $(wc -l < eel2d.vertex)"
+            echo ""
+            echo "First 10 lines of eel2d.vertex:"
+            head -10 eel2d.vertex
+          else
+            echo "✗ eel2d.vertex not found!"
+            exit 1
+          fi
+
+          if [ -f "eel2d_geometry.png" ]; then
+            echo "✓ eel2d_geometry.png exists"
+          fi
+
+      - name: Upload compiled binaries and outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: eel2d-outputs-${{ github.sha }}
+          path: |
+            eel2d.vertex
+            eel2d_geometry.png
+            eel2d_geometry.fig
+          retention-days: 30
+
+      - name: Upload vertex file separately
+        uses: actions/upload-artifact@v4
+        with:
+          name: eel2d-vertex-${{ github.sha }}
+          path: eel2d.vertex
+          retention-days: 90
+
+      - name: Create build summary
+        run: |
+          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Generated Files" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ eel2d.vertex ($(wc -l < eel2d.vertex) material points)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ eel2d_geometry.png" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ eel2d_geometry.fig" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Vertex File Details" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          head -5 eel2d.vertex >> $GITHUB_STEP_SUMMARY
+          echo "..." >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "All generated files have been uploaded as workflow artifacts." >> $GITHUB_STEP_SUMMARY
