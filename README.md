@@ -106,6 +106,81 @@ For more information about IBAMR and the Immersed Boundary method:
 - [IBAMR GitHub Repository](https://github.com/IBAMR/IBAMR)
 - [IBAMR Documentation](https://ibamr.github.io/)
 
+## Volume and Area Verification
+
+The repository includes comprehensive tests for verifying geometric properties of the generated eel body.
+
+### Running Volume and Area Tests
+
+To run all volume and area verification tests:
+
+```matlab
+RUN_VOLUME_AREA_TESTS
+```
+
+This will execute:
+1. Main eel geometry generation with area/volume calculations
+2. Detailed verification tests with multiple calculation methods
+
+### Test Coverage
+
+The verification tests include:
+
+#### 1. **Area Calculations**
+   - **Polygon method**: Using MATLAB's `polyarea()` on body envelope
+   - **Trapezoidal integration**: Integrating cross-sectional areas along body length
+   - **Analytical approximation**: Comparing with theoretical formulas
+   - **Material point method**: Area based on point count and grid spacing
+
+#### 2. **Volume Calculations**
+   - 2D area × unit depth (for 3D volume estimation)
+   - Multiple methods for cross-validation
+
+#### 3. **Section-Wise Analysis**
+   - Head section area (elliptical cross-section)
+   - Tail section area (linear taper)
+   - Conservation verification (head + tail = total)
+
+#### 4. **Geometric Properties**
+   - Perimeter calculation
+   - Compactness metric (isoperimetric ratio)
+   - Aspect ratio
+   - Cross-sectional height distribution
+
+#### 5. **Discretization Verification**
+   - Height discretization error analysis
+   - Comparison of theoretical vs actual cross-sections
+   - Grid resolution effects
+
+### Output Files
+
+Running the tests generates:
+
+```
+output/
+├── vertices/
+│   └── eel2d.vertex                      # Lagrangian material points
+├── images/
+│   ├── eel2d_straightswimmer.png         # Main geometry plot
+│   └── volume_area_verification.png      # Verification plots
+└── data/
+    ├── eel_geometry_properties.txt       # Basic geometric properties
+    └── volume_area_data.txt              # Detailed verification data
+```
+
+### Validation Metrics
+
+The tests verify:
+- Area calculation accuracy (< 0.1% error between methods)
+- Volume conservation
+- Height discretization error
+- Section-wise area conservation
+
+### Individual Test Files
+
+- **`eel2d_straightswimmer.m`**: Main script with integrated area/volume calculations
+- **`test_volume_area.m`**: Comprehensive verification test with multiple methods and visualizations
+
 ## Related Examples
 
 This is part of the ConstraintIB examples in IBAMR. See other examples in the IBAMR repository for similar fluid-structure interaction simulations.
