@@ -325,9 +325,13 @@ set(gca, 'FontSize', 11);
 
 sgtitle('NACA 0012 Method Validation', 'FontSize', 18, 'FontWeight', 'bold');
 
-% Save
-saveas(fig, fullfile(pwd, 'validation_test_NACA0012.png'));
-fprintf('Saved: validation_test_NACA0012.png\n\n');
+% Save to centralized output directory
+output_base = fullfile(fileparts(pwd), 'output');
+image_dir = fullfile(output_base, 'images');
+if ~exist(image_dir, 'dir'), mkdir(image_dir); end
+save_file = fullfile(image_dir, 'validation_test_NACA0012.png');
+saveas(fig, save_file);
+fprintf('Saved: %s\n\n', save_file);
 
 fprintf('================================================================\n');
 fprintf('  VALIDATION COMPLETE\n');
