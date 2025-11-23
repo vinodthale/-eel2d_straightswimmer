@@ -17,6 +17,12 @@
 clear all;
 clc;
 
+% Create output directories if they don't exist
+if ~exist('output', 'dir'), mkdir('output'); end
+if ~exist('output/vertices', 'dir'), mkdir('output/vertices'); end
+if ~exist('output/images', 'dir'), mkdir('output/images'); end
+if ~exist('output/pdfs', 'dir'), mkdir('output/pdfs'); end
+if ~exist('output/data', 'dir'), mkdir('output/data'); end
 
 %Background Mesh Properties
 Ny = 16*4*4*4; Ly = 4;
@@ -103,14 +109,29 @@ end
     
 
 % write the coordinates into txt file.
-fid = fopen('./eel2d.vertex','wt');
+vertex_file = fullfile('output', 'vertices', 'eel2d.vertex');
+fid = fopen(vertex_file,'wt');
 fprintf(fid,'%d\n',NumMatPoints);
 
 for i = 1:size(Coord,1)
-    
+
     for j = 1: length( Coord{i,1}  )
-        
+
          fprintf(fid,'%f\t%f\n', Coord{i,1}(j), Coord{i,2}(j) );
     end
 
 end
+fclose(fid);
+
+% Save the plot
+fig = gcf;
+set(fig, 'Position', [100 100 1200 800]);
+xlabel('x', 'FontSize', 12);
+ylabel('y', 'FontSize', 12);
+title('Eel 2D Straight Swimmer', 'FontSize', 14, 'FontWeight', 'bold');
+axis equal;
+grid on;
+plot_file = fullfile('output', 'images', 'eel2d_straightswimmer.png');
+saveas(fig, plot_file);
+fprintf('Saved vertex file: %s\n', vertex_file);
+fprintf('Saved plot: %s\n', plot_file);

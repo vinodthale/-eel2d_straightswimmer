@@ -20,7 +20,9 @@ clear; clc; close all;
 
 %% ---------------- Configuration ----------------
 save_plots = true;
-plot_dir = fullfile(pwd, 'comparison_plots');
+% Use centralized output directory
+output_base = fullfile(fileparts(pwd), 'output');
+plot_dir = fullfile(output_base, 'images');
 if save_plots && ~exist(plot_dir, 'dir')
     mkdir(plot_dir);
 end

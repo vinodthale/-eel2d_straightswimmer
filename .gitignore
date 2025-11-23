@@ -1,0 +1,22 @@
+# Output directories
+output/
+
+# Old output directories (deprecated)
+comparison_plots/
+original_method_plots/
+original_method_data/
+
+# MATLAB autosave files
+*.asv
+*.m~
+
+# Output files in root or naca_comparison directories
+*.vertex
+*.png
+*.pdf
+*.dat
+*.txt
+
+# System files
+.DS_Store
+Thumbs.db

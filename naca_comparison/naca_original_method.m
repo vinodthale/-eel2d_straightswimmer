@@ -21,8 +21,10 @@ clear; clc; close all;
 %% ---------------- User Configuration ----------------
 save_plots = true;
 save_coords = true;
-plot_dir = fullfile(pwd, 'original_method_plots');
-data_dir = fullfile(pwd, 'original_method_data');
+% Use centralized output directory
+output_base = fullfile(fileparts(pwd), 'output');
+plot_dir = fullfile(output_base, 'images');
+data_dir = fullfile(output_base, 'data');
 
 if save_plots && ~exist(plot_dir, 'dir'), mkdir(plot_dir); end
 if save_coords && ~exist(data_dir, 'dir'), mkdir(data_dir); end
