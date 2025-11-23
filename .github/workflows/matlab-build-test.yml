@@ -46,46 +46,44 @@ jobs:
             fprintf('Running eel2d_straightswimmer...\n');
             eel2d_straightswimmer;
             fprintf('Script completed successfully.\n');
-            if exist('eel2d.vertex', 'file')
-              fprintf('Output file eel2d.vertex generated successfully.\n');
-              fileInfo = dir('eel2d.vertex');
+            if exist('output/vertices/eel2d.vertex', 'file')
+              fprintf('Output file output/vertices/eel2d.vertex generated successfully.\n');
+              fileInfo = dir('output/vertices/eel2d.vertex');
               fprintf('File size: %d bytes\n', fileInfo.bytes);
             else
-              error('Output file eel2d.vertex was not generated!');
+              error('Output file output/vertices/eel2d.vertex was not generated!');
             end
 
-      - name: Save generated plot
+      - name: Verify generated plot
         uses: matlab-actions/run-command@v2
         with:
           command: |
-            fprintf('Saving eel geometry plot...\n');
-            eel2d_straightswimmer;
-            title('2D Eel Straight Swimmer Geometry');
-            xlabel('X coordinate');
-            ylabel('Y coordinate');
-            axis equal;
-            grid on;
-            saveas(gcf, 'eel2d_geometry.png');
-            saveas(gcf, 'eel2d_geometry.fig');
-            fprintf('Plot saved successfully.\n');
+            fprintf('Verifying generated plot...\n');
+            if exist('output/images/eel2d_straightswimmer.png', 'file')
+              fprintf('Plot output/images/eel2d_straightswimmer.png exists.\n');
+              fileInfo = dir('output/images/eel2d_straightswimmer.png');
+              fprintf('File size: %d bytes\n', fileInfo.bytes);
+            else
+              error('Plot file was not generated!');
+            end
 
       - name: Verify generated files
         run: |
           echo "Checking generated files..."
-          if [ -f "eel2d.vertex" ]; then
-            echo "✓ eel2d.vertex exists"
-            echo "File size: $(wc -c < eel2d.vertex) bytes"
-            echo "Number of lines: $(wc -l < eel2d.vertex)"
+          if [ -f "output/vertices/eel2d.vertex" ]; then
+            echo "✓ output/vertices/eel2d.vertex exists"
+            echo "File size: $(wc -c < output/vertices/eel2d.vertex) bytes"
+            echo "Number of lines: $(wc -l < output/vertices/eel2d.vertex)"
             echo ""
             echo "First 10 lines of eel2d.vertex:"
-            head -10 eel2d.vertex
+            head -10 output/vertices/eel2d.vertex
           else
-            echo "✗ eel2d.vertex not found!"
+            echo "✗ output/vertices/eel2d.vertex not found!"
             exit 1
           fi
 
-          if [ -f "eel2d_geometry.png" ]; then
-            echo "✓ eel2d_geometry.png exists"
+          if [ -f "output/images/eel2d_straightswimmer.png" ]; then
+            echo "✓ output/images/eel2d_straightswimmer.png exists"
           fi
 
       - name: Upload compiled binaries and outputs
@@ -93,16 +91,15 @@ jobs:
         with:
           name: eel2d-outputs-${{ github.sha }}
           path: |
-            eel2d.vertex
-            eel2d_geometry.png
-            eel2d_geometry.fig
+            output/vertices/eel2d.vertex
+            output/images/eel2d_straightswimmer.png
           retention-days: 30
 
       - name: Upload vertex file separately
         uses: actions/upload-artifact@v4
         with:
           name: eel2d-vertex-${{ github.sha }}
-          path: eel2d.vertex
+          path: output/vertices/eel2d.vertex
           retention-days: 90
 
       - name: Create build summary
@@ -110,13 +107,12 @@ jobs:
           echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Generated Files" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ eel2d.vertex ($(wc -l < eel2d.vertex) material points)" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ eel2d_geometry.png" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ eel2d_geometry.fig" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ output/vertices/eel2d.vertex ($(wc -l < output/vertices/eel2d.vertex) material points)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ output/images/eel2d_straightswimmer.png" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Vertex File Details" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          head -5 eel2d.vertex >> $GITHUB_STEP_SUMMARY
+          head -5 output/vertices/eel2d.vertex >> $GITHUB_STEP_SUMMARY
           echo "..." >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
